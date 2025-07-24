@@ -1,0 +1,2 @@
+[console_scripts]
+metazarr = metazarr.cli:main

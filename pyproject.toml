@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metazarr"
+version = "0.1.0"
+description = "A lightweight Zarr–Dask–Xarray toolkit for meteorological and oceanographic data."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Your Name", email = "you@example.com" }
+]
+requires-python = ">=3.9"
+
+# 运行时依赖
+dependencies = [
+    "xarray>=2023.1",
+    "dask[array]>=2023.1",
+    "zarr>=2.15",
+    "numcodecs>=0.11",
+    "cfgrib>=0.9.10.4",
+    "eccodes>=2.28",
+    "netcdf4>=1.6",
+    "h5netcdf>=1.2",
+    "matplotlib>=3.8",
+]
+
+# 可选依赖
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4",
+]
+
+dev = [
+    "black>=24.0",
+    "isort>=5.13",
+    "flake8>=6.0",
+    "pytest>=7.4",
+]
+
+# 让 `pip install metazarr` 后生成 CLI
+[project.scripts]
+metazarr = "metazarr.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["metazarr*"]

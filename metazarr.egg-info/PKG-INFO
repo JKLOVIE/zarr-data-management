@@ -1,0 +1,25 @@
+Metadata-Version: 2.4
+Name: metazarr
+Version: 0.1.0
+Summary: A lightweight Zarr–Dask–Xarray toolkit for meteorological and oceanographic data.
+Author-email: Your Name <you@example.com>
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: xarray>=2023.1
+Requires-Dist: dask[array]>=2023.1
+Requires-Dist: zarr>=2.15
+Requires-Dist: numcodecs>=0.11
+Requires-Dist: cfgrib>=0.9.10.4
+Requires-Dist: eccodes>=2.28
+Requires-Dist: netcdf4>=1.6
+Requires-Dist: h5netcdf>=1.2
+Requires-Dist: matplotlib>=3.8
+Provides-Extra: test
+Requires-Dist: pytest>=7.4; extra == "test"
+Provides-Extra: dev
+Requires-Dist: black>=24.0; extra == "dev"
+Requires-Dist: isort>=5.13; extra == "dev"
+Requires-Dist: flake8>=6.0; extra == "dev"
+Requires-Dist: pytest>=7.4; extra == "dev"
+Dynamic: license-file
