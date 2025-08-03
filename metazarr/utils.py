@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Sequence
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from .config import CATALOG_PATH
 
 log = logging.getLogger("metazarr")
@@ -32,5 +32,7 @@ def load_catalog():
 def save_catalog(cat: dict):
     CATALOG_PATH.write_text(json.dumps(cat, indent=2, ensure_ascii=False))
 
-def timestamp():
-    return datetime.utcnow().isoformat(timespec='seconds') + "Z"
+def timestamp(tz_hours: int = 8) -> str:
+    """返回东八区 ISO-8601 字符串，如 2025-08-03T16:44:02+08:00"""
+    tz = timezone(timedelta(hours=tz_hours))
+    return datetime.now(tz).isoformat(timespec="seconds")

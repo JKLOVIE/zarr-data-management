@@ -11,6 +11,7 @@ class RawFormat(str, Enum):
     GRIB = "grib"
     NETCDF = "netcdf"
     HDF = "hdf"
+    ZARR = 'zarr'
 
 class OrgMode(str, Enum):
     HOURLY  = "xhour"
