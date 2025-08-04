@@ -6,19 +6,14 @@ mz = open_dataset("zarr_ready_test")
 print("✅ 打开成功，整体尺寸:", mz._ds.dims)
 
 # —— 裁剪：时间 + 区域 + 气压层 ——
-payload = mz.subset_ndarray(
-    var="t",
-    time=("2020-11-01T00","2020-11-10T06"),
-    lat=(30,20),
-    lon=(110,112),
-    level=(1000, 1000)                # 单层 = 线裁剪
+ds_sub = mz.subset(
+    time=("2020-11-02", "2020-11-03"),   # 一整天
+    lat=(30, 20),                       # 注意：支持反向 slice
+    lon=(130, 150),
+    level=(1000, 1000),                 # 单层 = 线裁剪
 )
 
-import json, pprint
-print(json.dumps(payload, ensure_ascii=False)[:500]+" …")
-
-
-#print("✂️  裁剪后尺寸:", ds_sub.dims)
+print("✂️  裁剪后尺寸:", ds_sub['t'].values)
 
 # —— 导出 NetCDF ——
 #out_nc = Path("slice_20201102_30N20N_130E150E.nc")

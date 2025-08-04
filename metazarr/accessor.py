@@ -8,7 +8,9 @@ from typing import List, Dict, Sequence, Tuple
 from .config import OutputFormat
 from .catalog import show_dataset_info
 from .exceptions import RangeError
-
+import numpy as np
+import json
+import pandas as pd
 def _collect_zarr_stores(root: Path) -> List[str]:
     """
     如果 root 本身就是 *.zarr → 直接返回 [root]；
@@ -33,7 +35,7 @@ def open_dataset(name: str) -> "MZDataset":
     ds = xr.open_mfdataset(
         stores,
         engine="zarr",
-        concat_dim="time",            # 按时间维拼接
+        concat_dim="valid_time",            # 按时间维拼接
         combine="nested",             # 保留各子集原坐标顺序
         coords="minimal",
         parallel=True,                # 多线程读取
@@ -50,7 +52,51 @@ class MZDataset:
     def __init__(self, ds: xr.Dataset, meta: Dict):
         self._ds = ds
         self.meta = meta
+    def subset_json(
+        self, *,
+        vars=None, time=None, lat=None, lon=None, level=None, step=None,
+        orient="records", max_points: int = 1_000_000,
+    ) -> dict:
+        """
+        返回 DataFrame-to-JSON 的结果（records / split …）。
+        - orient     同 pandas DataFrame.to_json
+        - max_points 限制返回行数，防止一次拉取过大
+        """
+        ds_sub = self.subset(vars=vars, time=time, lat=lat,
+                             lon=lon, level=level, step=step)
 
+        df = ds_sub.to_dataframe().reset_index()
+        if len(df) > max_points:
+            raise ValueError(f"查询结果 {len(df)} 行，超过上限 {max_points}")
+
+        return json.loads(df.to_json(orient=orient, date_unit="s"))
+    def subset_ndarray(
+        self, *, var: str,
+        time=None, lat=None, lon=None, level=None, step=None,
+        squeeze: bool = True
+    ) -> dict:
+        ds_sub = self.subset(vars=[var], time=time, lat=lat,
+                             lon=lon, level=level, step=step)
+        da = ds_sub[var].load()
+        if squeeze:
+            da = da.squeeze()
+
+        # ---- 关键：coord 转 list 时检查 dtype ----
+        coords_json = {}
+        for c in da.coords:
+            arr = da[c].values
+            if np.issubdtype(arr.dtype, np.datetime64):
+                # 转成 ISO-8601 字符串列表
+                coords_json[c] = [str(t) for t in arr.astype("datetime64[ns]")]
+            else:
+                coords_json[c] = arr.tolist()
+
+        return {
+            "dims":   list(da.dims),
+            "coords": coords_json,
+            "data":   da.values.tolist(),
+            "attrs":  dict(da.attrs),
+        }
     # ── 检索接口 ─────────────────────────────────────────────────────────────
     def subset(
         self,
